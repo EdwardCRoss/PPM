@@ -35,6 +35,7 @@ public:
 	ALLEGRO_BITMAP *projectileSprite;
 
 	void update();
+	void draw();
 	void init(int tempx, int tempy, float tempvelocity, float tempdirection, ALLEGRO_BITMAP *tempProjectileSPrite) {
 		x = tempx;
 		y = tempy;
@@ -60,6 +61,11 @@ public:
 	
 	void update();
 
+	void fireProjetile(float direction);
+	void fireLine(float direction, int numberOf);
+	void fireCircle( int numberOf);
+
+
 	void init(int tempx, int tempy, int tempOffx, int tempOffy, float tempgradient, int temppower, ALLEGRO_BITMAP *tempimage) {
 		x = tempx;
 		y = tempy;
@@ -80,7 +86,6 @@ float distanceBetween(int x1, int y1, int x2, int y2);
 
 void updateEnemies();
 
-void drawProjectiles();
-void updateProjectiles();
+
 
 void drawScreen();
