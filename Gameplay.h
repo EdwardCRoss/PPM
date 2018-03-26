@@ -12,7 +12,7 @@
 #include <iostream>
 #include <cmath>
 #include <math.h>
-
+#include <random>
 
 class backgroundC {
 //Variables

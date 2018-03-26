@@ -2,7 +2,7 @@
 #include "Gameplay.h"
 
 
-ALLEGRO_BITMAP *testImage, *background, *enemyShip, *projectileMain, *projectileSide, *tempProjectile;
+ALLEGRO_BITMAP *testImage, *background, *enemyShip, *projectileMain, *projectileSide, *tempProjectile, *backgroundTint;
 int playerX, playerY, frameCount;
 ALLEGRO_KEYBOARD_STATE *keyboardState;
 bool firing = false;
@@ -11,6 +11,8 @@ bool focus = false;
 int playerSpeed = 10;
 int windowWidth = 800;
 int windowHeight = 600;
+int bpm = 80;
+int intensity = 2;
 
 std::vector<standardEnemy> enemyList; //lists for sprites
 std::vector<std::vector<int>> projectileList;
@@ -134,8 +136,40 @@ void updateEnemies() {
 	}
 }
 
-void drawScreen() {
+void drawBackgroundTint(float r, float g, float b, float a) {
+	if (intensity<3) {
+		r = 0;
+		g = 0;
+		b = 1;
+	
+	}
+	else if (intensity<6) {
+		r = 0;
+		g = 0.5;
+		b = 0.5;
+	}
+	else if (intensity<9) {
+		r = 0;
+		g = 1;
+		b = 0;
+	}
+	else if (intensity<12) {
+		r = 0.5;
+		g = 0.5;
+		b = 0;
+	}
+	else {
+		r = 1;
+		g = 0;
+		b = 0;
+	}
 
+
+	al_draw_tinted_bitmap(backgroundTint, al_map_rgba_f(r, g, b, a), 0, 0, 0);
+}
+
+void drawScreen() {
+	drawBackgroundTint(1,1,1,0.1);
 	drawEnemies();
 	drawPlayerProjectiles();
 	drawEnemyProjectiles();
@@ -164,6 +198,7 @@ int Gameplay()
 	projectileMain = al_load_bitmap("Red_note_.png");
 	projectileSide = al_load_bitmap("Green_note.png");
 	tempProjectile = al_load_bitmap("tempProjectile.png");
+	backgroundTint = al_load_bitmap("backgroundTint.png");
 	ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
 
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
@@ -176,6 +211,9 @@ int Gameplay()
 	int xMoveSpeedRight = 0;
 	int yMoveSpeedUp = 0;
 	int yMoveSpeedDown = 0;
+
+	std::string bpmString;
+	std::string intesityString;
 
 	while (!done) { //user input handling
 		ALLEGRO_EVENT events;
@@ -226,14 +264,18 @@ int Gameplay()
 			case ALLEGRO_KEY_P:
 				break;
 			case ALLEGRO_KEY_COMMA:
-				currentBackground.speed++;
-
-				//std::cout << currentBackground.speed << std::endl;
+				bpm++;
 				break;
 			case ALLEGRO_KEY_FULLSTOP:
 				if (currentBackground.speed > 1) {
-					currentBackground.speed--;
+					bpm--;
 				}
+				break;
+			case ALLEGRO_KEY_T:
+				intensity++;
+				break;
+			case ALLEGRO_KEY_Y:
+				intensity--;
 				break;
 			}
 		}
@@ -286,11 +328,27 @@ int Gameplay()
 			}
 		}
 
+		if (frameCount%(240-(intensity*5))==0) {
+			standardEnemy temp;
+			temp.init(1, 1, (rand()%600), -30, 0.01, 2, enemyShip);
+			enemyList.push_back(temp);
+
+			for (int i = 0; i < enemyList.size(); i++) {
+				enemyList[i].fireCircle(16);
+			}
+		}
+
 		playerX += (xMoveSpeedLeft + xMoveSpeedRight);//updates player position
 		playerY += (yMoveSpeedUp + yMoveSpeedDown);
 		currentBackground.draw();//other updates
-		
+		currentBackground.speed = bpm / 5;
+		bpmString = "BPM: " + std::to_string(bpm);
+		intesityString = "Intesity: " + std::to_string(intensity);
+		al_draw_textf(font, al_map_rgb(0, 0, 0), 10, 30, 0, bpmString.c_str());
+		al_draw_textf(font, al_map_rgb(0, 0, 0), 10, 50, 0, intesityString.c_str());
 		drawScreen();
+		
+
 		updateEnemies();
 		currentBackground.update();
 
